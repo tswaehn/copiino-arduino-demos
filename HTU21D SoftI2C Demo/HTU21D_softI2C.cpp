@@ -140,6 +140,29 @@ float HTU21Dsoft::readTemperature(void)
 	return(realTemperature);  
 }
 
+void HTU21Dsoft::setHeater(boolean on)
+{
+  i2c_start((HTDU21D_ADDRESS << 1) | 0x00);  // 0x00: WRITE
+  //  <addr> is the 8-bit I2C address (including the R/W bit)
+  i2c_write(READ_USER_REG);
+  i2c_stop();
+
+  i2c_start((HTDU21D_ADDRESS << 1) | 0x01);  // 0x01: READ
+  uint8_t userRegisterData = i2c_read(1);  // 1: last byte to read
+  i2c_stop();
+
+  if(on) {
+    userRegisterData |= 0x04; // Heater ON
+  } else {
+    userRegisterData &= 0xFB; // Heater OFF
+  }
+
+  i2c_start(HTDU21D_ADDRESS << 1 | 0x00);
+  i2c_write(WRITE_USER_REG);
+  i2c_write(userRegisterData);
+  i2c_stop();
+}
+
 //Set sensor resolution
 /*******************************************************************************************/
 //Sets the sensor resolution to one of four levels
